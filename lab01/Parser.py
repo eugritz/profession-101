@@ -1,77 +1,69 @@
 import re
 import requests
+import xlsxwriter
 from bs4 import BeautifulSoup
-from functools import cached_property
 
 def parse():
     url = 'https://www.cian.ru/kupit-kvartiru-1-komn-ili-2-komn/'
     page = requests.get(url)
 
+    workbook = xlsxwriter.Workbook('Квартиры.xlsx')
+    cell_format = workbook.add_format({ 'font_name': 'Liberation Sans' })
+    worksheet = workbook.add_worksheet('Лист 1')
+
     soup = BeautifulSoup(page.text, "html.parser")
     raw_cards = soup.find_all('article', attrs={'data-name': 'CardComponent'})
+
+    header_ready = False
+
+    row = 0
     for rc in raw_cards:
-        card = CardComponent.raw(rc)
-        # TODO: serialization (output everything in .xlsx file)
+        general, side = rc.find_all('div', class_=re.compile(r'--content--'))[0].find_all('div', recursive=False)
+        parsed = __parse_general(general)
+        parsed.update(__parse_side(side))
 
-class CardComponent:
-    def __init__(self, data):
-        content = data.find_all('div', class_=re.compile(r'--content--'))[0].find_all('div', recursive=False)
-        self.general = CardGeneral.raw(content[0])
-        self.side = CardSide.raw(content[1])
+        col = 0
+        if not header_ready:
+            for k in parsed.keys():
+                worksheet.write(row, col, k, cell_format)
+                col += 1
+            header_ready = True
+            row += 1
+            col = 0
 
-    @staticmethod
-    def raw(data):
-        return CardComponent(data)
+        for v in parsed.values():
+            worksheet.write(row, col, v, cell_format)
+            col += 1
+        row += 1
 
-class CardGeneral:
-    def __init__(self, data):
-        self.__data = data
+    workbook.close()
 
-    @staticmethod
-    def raw(data):
-        return CardGeneral(data)
+def __parse_general(data):
+    parsed = {}
+    parsed['title'] = data.find('span', attrs={'data-mark': 'OfferTitle'}).span.string
+    parsed['subtitle'] = data.find('span', attrs={'data-mark': 'OfferSubtitle'}).string
 
-    @cached_property
-    def title(self):
-        return self.__data.find('span', attrs={'data-mark': 'OfferTitle'}).span.string
+    special_geo = data.find('div', attrs={'data-name': 'SpecialGeo'})
+    parsed['special_geo'] = special_geo.a.find_all('div')[2].string
 
-    @cached_property
-    def subtitle(self):
-        return self.__data.find('span', attrs={'data-mark': 'OfferSubtitle'}).string
+    housing = ''
+    geo_info_len = len(special_geo.find_parent('div'))
+    if geo_info_len > 2:
+        while geo_info_len > 3:
+            special_geo = special_geo.find_previous_sibling('div')
+            geo_info_len -= 1
+        housing = special_geo.find_previous_sibling('div').a.string
+    parsed['housing'] = housing
 
-    @cached_property
-    def housing(self):
-        return self.__data.find('div', attrs={'data-name': 'SpecialGeo'}).find_previous_sibling('div').a.string
+    parsed['labels'] = ', '.join([l.string for l in data.find('div', class_=re.compile(r'--labels--')).find_all('a')])
+    parsed['price'] = data.find('span', attrs={'data-mark': 'MainPrice'}).span.string
+    parsed['price_per_meter'] = data.find('p', attrs={'data-mark': 'PriceInfo'}).string
+    return parsed
 
-    @cached_property
-    def special_geo(self):
-        return self.__data.find('div', attrs={'data-name': 'SpecialGeo'}).a.find_all('div')[2].string
+def __parse_side(data):
+    branding = data.find('div', attrs={'data-name': 'BrandingLevelWrapper'}).find_all('span')
 
-    @cached_property
-    def labels(self):
-        labels = self.__data.find('div', class_=re.compile(r'--labels--')).find_all('a')
-        return ', '.join([l.string for l in labels])
+    parsed = {}
+    parsed['agent'] = branding[2].string
+    return parsed
 
-    @cached_property
-    def price(self):
-        return self.__data.find('span', attrs={'data-mark': 'MainPrice'}).span.string
-
-    @cached_property
-    def price_per_meter(self):
-        return self.__data.find('p', attrs={'data-mark': 'PriceInfo'}).string
-
-class CardSide:
-    def __init__(self, data):
-        self.__data = data
-
-    @staticmethod
-    def raw(data):
-        return CardSide(data)
-
-    @cached_property
-    def agent(self):
-        return self.__branding[2].string
-
-    @cached_property
-    def __branding(self):
-        return self.__data.find('div', attrs={'data-name': 'BrandingLevelWrapper'}).find_all('span')
