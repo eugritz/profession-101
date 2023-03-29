@@ -40,11 +40,11 @@ def parse():
 
 def __parse_general(data):
     parsed = {}
-    parsed['title'] = data.find('span', attrs={'data-mark': 'OfferTitle'}).span.string
-    parsed['subtitle'] = data.find('span', attrs={'data-mark': 'OfferSubtitle'}).string
+    parsed['Название'] = data.find('span', attrs={'data-mark': 'OfferTitle'}).span.string
+    parsed['Квартира'] = data.find('span', attrs={'data-mark': 'OfferSubtitle'}).string
 
     special_geo = data.find('div', attrs={'data-name': 'SpecialGeo'})
-    parsed['special_geo'] = special_geo.a.find_all('div')[2].string
+    parsed['Расположение'] = special_geo.a.find_all('div')[2].string
 
     housing = ''
     geo_info_len = len(special_geo.find_parent('div'))
@@ -53,17 +53,17 @@ def __parse_general(data):
             special_geo = special_geo.find_previous_sibling('div')
             geo_info_len -= 1
         housing = special_geo.find_previous_sibling('div').a.string
-    parsed['housing'] = housing
+    parsed['Жилой комплекс'] = housing
 
-    parsed['labels'] = ', '.join([l.string for l in data.find('div', class_=re.compile(r'--labels--')).find_all('a')])
-    parsed['price'] = data.find('span', attrs={'data-mark': 'MainPrice'}).span.string
-    parsed['price_per_meter'] = data.find('p', attrs={'data-mark': 'PriceInfo'}).string
+    parsed['Адрес'] = ', '.join([l.string for l in data.find('div', class_=re.compile(r'--labels--')).find_all('a')])
+    parsed['Цена'] = data.find('span', attrs={'data-mark': 'MainPrice'}).span.string
+    parsed['Цена за м²'] = data.find('p', attrs={'data-mark': 'PriceInfo'}).string
     return parsed
 
 def __parse_side(data):
     branding = data.find('div', attrs={'data-name': 'BrandingLevelWrapper'}).find_all('span')
 
     parsed = {}
-    parsed['agent'] = branding[2].string
+    parsed['Застройщик'] = branding[2].string
     return parsed
 
