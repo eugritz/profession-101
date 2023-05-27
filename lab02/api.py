@@ -1,6 +1,10 @@
-from typing import Self
+from typing import Optional, Self, overload
 from bs4 import BeautifulSoup
 import requests
+
+
+MAX_SEARCH_RESULTS_COUNT = 20
+
 
 class SearchOptions:
     def __init__(self, city: str, page: int = 1):
@@ -9,6 +13,13 @@ class SearchOptions:
 
 
 class SearchItem:
+    name: str
+    manufacturer: str
+    price: str
+    id: str
+    preview_image_source: str
+    href: str
+
     def __init__(self, name: str, manufacturer: str, price: str):
         self.name = name
         self.manufacturer = manufacturer
@@ -20,6 +31,13 @@ class SearchItem:
 
 
 class SearchResults:
+    query: str
+    options: SearchOptions
+    page_count: int
+    count: int
+    data: list[SearchItem]
+
+
     def __init__(self, query: str, options: SearchOptions):
         self.query = query
         self.options = options
@@ -52,8 +70,15 @@ class SearchResults:
         return SearchResultsIterator(self)
 
 
-    def __getitem__(self, index: int) -> SearchItem:
-        return self.data[index]
+    @overload
+    def __getitem__(self, key: int) -> SearchItem: ...
+    @overload
+    def __getitem__(self, key: slice) -> list[SearchItem]: ...
+    def __getitem__(self, key: int | slice) -> SearchItem | list[SearchItem]:
+        if isinstance(key, slice):
+            indices = range(*key.indices(len(self.data)))
+            return [self.data[i] for i in indices]
+        return self.data[key]
 
 
 class SearchResultsIterator:
@@ -69,7 +94,6 @@ class SearchResultsIterator:
     def __next__(self) -> SearchItem:
         if self._index < len(self._results):
             item = self._results[self._index]
-            self._index += 1
             return item
         raise StopIteration
 
@@ -100,6 +124,11 @@ class FacilityOptions:
 
 
 class Facility:
+    name: str
+    address: str
+    local_price: str
+    in_stock: bool
+
     def __init__(self, name, address, price):
         self.name = name
         self.address = address
@@ -108,6 +137,12 @@ class Facility:
 
 
 class FacilityResults:
+    id: str
+    options: FacilityOptions
+    count: int
+    data: list[Facility]
+
+
     def __init__(self, id: str, options: FacilityOptions):
         self.id = id
         self.options = options
@@ -127,8 +162,15 @@ class FacilityResults:
         return FacilityResultsIterator(self)
 
 
-    def __getitem__(self, index: int) -> Facility:
-        return self.data[index]
+    @overload
+    def __getitem__(self, key: int) -> Facility: ...
+    @overload
+    def __getitem__(self, key: slice) -> list[Facility]: ...
+    def __getitem__(self, key: int | slice) -> Facility | list[Facility]:
+        if isinstance(key, slice):
+            indices = range(*key.indices(len(self.data)))
+            return [self.data[i] for i in indices]
+        return self.data[key]
 
 
 class FacilityResultsIterator:
@@ -167,6 +209,7 @@ class ItemParser:
 
 
 def search(query: str, options: SearchOptions) -> SearchResults:
+    origin = f'https://{options.city}.vapteke.ru'
     page = requests.get(f'https://{options.city}.vapteke.ru/search?s={query}&page={options.page}')
     if page.status_code != 200:
         return SearchResults(query, options)
@@ -179,7 +222,9 @@ def search(query: str, options: SearchOptions) -> SearchResults:
     
     items = []
     for raw_item in raw_items:
-        items.append(SearchItemParser.parse(raw_item))
+        parsed = SearchItemParser.parse(raw_item)
+        parsed.preview_image_source = origin + parsed.preview_image_source
+        items.append(parsed)
     if len(items) == 0:
         return SearchResults(query, options)
 
