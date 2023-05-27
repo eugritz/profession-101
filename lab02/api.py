@@ -20,16 +20,11 @@ class SearchItem:
 
 
 class SearchResults:
-    query: str
-    options: SearchOptions
-    page_count: int
-    count: int
-    data: list[SearchItem]
-
     def __init__(self, query: str, options: SearchOptions):
         self.query = query
         self.options = options
         self.page_count = options.page
+        self.count = 0
         self.data = []
 
 
@@ -113,14 +108,10 @@ class Facility:
 
 
 class FacilityResults:
-    id: str
-    options: FacilityOptions
-    count: int
-    data: list[Facility]
-
     def __init__(self, id: str, options: FacilityOptions):
         self.id = id
         self.options = options
+        self.count = 0
         self.data = []
 
 
