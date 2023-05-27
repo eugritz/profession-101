@@ -3,4 +3,4 @@
 
 [Ссылка](https://artemiikabanov.notion.site/2-a27d0a4da6c449de90d9073a7725c7c8)
 
-![Таблица Excel с полученными данными](preview.jpg)
+![Диалог с ботом MedFind](preview.jpg)
