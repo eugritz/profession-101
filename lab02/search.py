@@ -27,11 +27,6 @@ class ItemCallbackData(CallbackData, prefix='item'):
     id: str
 
 
-class PaginationDirection(str, Enum):
-    next = 'next'
-    previous = 'prev'
-
-
 class ItemPaginationCallbackData(CallbackData, prefix='item_pag'):
     query: Optional[str] = None
     page: Optional[int] = None
@@ -136,7 +131,6 @@ async def callback_item_pagination(
 
     await callback.answer('Получение записей, это может занять некоторое время')
     actual_page = (page * SEARCH_PAGE_SIZE - 1) // api.MAX_SEARCH_RESULTS_COUNT + 1
-    print(actual_page)
     result = api.search(query, api.SearchOptions(city, page=actual_page))
     filtered = paginate(result, (page - 1) % 5, SEARCH_PAGE_SIZE)
 
