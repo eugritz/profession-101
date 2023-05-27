@@ -1,9 +1,19 @@
-from typing import Optional, Self, overload
+from typing import Self, overload
 from bs4 import BeautifulSoup
 import requests
 
 
 MAX_SEARCH_RESULTS_COUNT = 20
+
+
+class City:
+    id: str
+    name: str
+
+
+    def __init__(self, id: str, name: str):
+        self.id = id
+        self.name = name
 
 
 class SearchOptions:
@@ -19,6 +29,7 @@ class SearchItem:
     id: str
     preview_image_source: str
     href: str
+
 
     def __init__(self, name: str, manufacturer: str, price: str):
         self.name = name
@@ -128,6 +139,7 @@ class Facility:
     address: str
     local_price: str
     in_stock: bool
+
 
     def __init__(self, name, address, price):
         self.name = name
@@ -268,3 +280,21 @@ def get_facilities(id: str, options: FacilityOptions) -> FacilityResults:
     results.data = items
     results.count = item_count
     return results
+
+
+def get_cities() -> list[City]:
+    page = requests.get('https://msk.vapteke.ru/modal/cities-list')
+    soup = BeautifulSoup(page.text, 'html.parser')
+    raw_cities = soup.find_all('ul', id='cities-list')[0].find_all(recursive=False)
+    if raw_cities == None:
+        return []
+
+    cities = []
+    for raw_city in raw_cities:
+        name = raw_city.a.text
+        raw_id = raw_city.a['href']
+        id = raw_id[raw_id.find('=') + 1: raw_id.find('.')]
+        if id == 'vapteke':
+            id = ''
+        cities.append(City(id, name))
+    return cities

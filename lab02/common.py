@@ -3,9 +3,11 @@ from aiogram.filters import Command, StateFilter, Text
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup
+from api import get_cities
 
 
 router = Router()
+cities = get_cities()
 
 
 class Form(StatesGroup):
@@ -39,9 +41,15 @@ async def cmd_cancel(message: Message, state: FSMContext):
     await message.reply('Операция отменена')
 
 
-@router.message(Form.city)
+@router.message(Form.city, Text(startswith=''))
 async def process_city(message: Message, state: FSMContext):
-    await state.update_data(city=message.text)
+    assert message.text != None
+    success = False
+    for city in cities:
+        if city.name.lower() == message.text.lower():
+            await state.update_data(city=city.id)
+            success = True
+            break
 
     buttons = [
         [KeyboardButton(text='Поиск')],
@@ -53,8 +61,12 @@ async def process_city(message: Message, state: FSMContext):
         input_field_placeholder='Введите название лекарства'
     )
 
-    answer = 'Город успешно задан!\n' + \
-             'Для поиска лекарств просто напишите сообщение в этом чате'
+    if success:
+        answer = 'Город успешно задан!\n' + \
+                 'Для поиска лекарств просто напишите сообщение в этом чате'
+    else:
+        answer = 'Мы не нашли город с таким названием.\n' + \
+                 'Для поиска лекарств необходимо выбрать город'
 
     await message.answer(answer, reply_markup=keyboard)
     await state.set_state(state=None)
@@ -68,5 +80,3 @@ async def btn_search(message: Message):
 @router.message(Text('Изменить город'))
 async def btn_change_city(message: Message):
     await cmd_city(message)
-
-
