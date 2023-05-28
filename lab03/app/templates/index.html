@@ -1,0 +1,56 @@
+{% set title = 'Figures' %}
+{% extends 'layout.html' %}
+{% from 'forms.html' import input %}
+
+{% block head %}
+  <link href="/static/css/style.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+{% block content %}
+  <div class="content">
+    <div>
+      <h2>Многогранники</h2>
+      <hr/>
+      <ul class="grid">
+        {% for figure in figures %}
+          <li>
+            <button class="figure" data-id={{loop.index0}}>
+              <div class="figure__content">
+                <img
+                  class="figure__content__preview"
+                  src={{figure.preview_src}}
+                />
+                <p class="figure__content__name">{{figure.name}}</p>
+              </div>
+            </button>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h2 id="calculator-label">Расчет объема фигуры</h2>
+      <hr/>
+      <div id="calculator-list">
+        {% for figure in figures %}
+          <div
+            class="form hidden"
+            data-id={{loop.index0}}
+            data-name={{figure.id}}
+          >
+            {% for group in figure.groups %}
+              <div>
+                {% for field in group %}
+                  {{ input(field.data_key, field.metadata.name) }}
+                {% endfor %}
+                <button>Вычислить</button>
+              </div>
+              {% if not loop.last %}
+                <p>либо</p>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <script src="/static/script.js"></script>
+{% endblock %}
