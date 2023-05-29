@@ -14,6 +14,17 @@ function ready() {
     figures[i].addEventListener("click", selectFigure);
   }
 
+  const calculators = document.getElementsByClassName("calculator");
+  for (let i = 0; i < calculators.length; i++) {
+    const forms = calculators[i].getElementsByClassName("form");
+    for (let j = 0; j < forms.length; j++) {
+      const submit = forms[j].querySelector('input[type="submit"]');
+      if (submit) {
+        submit.addEventListener("click", (_) => calculate(calculators[i], forms[j]));
+      }
+    }
+  }
+
   setupSliders();
   setSelectedFigure(0);
 }
@@ -67,6 +78,44 @@ function selectFigure(event) {
   if (id) {
     setSelectedFigure(id);
   }
+}
+
+function calculate(calculator, form) {
+  let body = {};
+  let anyErrors = false;
+  const items = form.getElementsByClassName("form__item");
+
+  for (let i = 0; i < items.length; i++) {
+    const fields = items[i].getElementsByTagName("input");
+    for (let j = 0; j < fields.length; j++) {
+      if (!fields[j].validity.valid) {
+        if (items[i].querySelector(".form__error"))
+          continue;
+
+        if (!anyErrors)
+          anyErrors = true;
+
+        const error = document.createElement("p");
+        error.classList.add("form__error");
+        error.innerText = "Поле должно быть заполнено!";
+        items[i].appendChild(error);
+      } else {
+        const error = items[i].querySelector(".form__error");
+        body[fields[j].name] = fields[j].value;
+
+        if (!error)
+          continue;
+        items[i].removeChild(error);
+      }
+    }
+  }
+
+  if (anyErrors)
+    return;
+
+  const precision = document.getElementById("precision");
+  const slider = precision.querySelector(".slider input");
+  body["precision"] = slider.value;
 }
 
 document.addEventListener("DOMContentLoaded", ready);

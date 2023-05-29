@@ -1,6 +1,6 @@
 {% macro input(name, description) %}
   <div class="form__item">
     <p>{{description}}:</p>
-    <input name="{{name}}" type="number"/>
+    <input name="{{name}}" type="number" min="0" step="any" required/>
   </div>
 {% endmacro %}
