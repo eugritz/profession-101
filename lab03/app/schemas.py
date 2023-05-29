@@ -73,7 +73,7 @@ class IcosahedronSchema(FigureSchema):
 
 
     @post_load
-    def make_dodecahedron(self, data, **kwargs):
+    def make_icosahedron(self, data, **kwargs):
         return Icosahedron(**data)
 
 
