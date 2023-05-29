@@ -116,6 +116,32 @@ function calculate(calculator, form) {
   const precision = document.getElementById("precision");
   const slider = precision.querySelector(".slider input");
   body["precision"] = slider.value;
+
+  fetch("/api/calculate/" + calculator.dataset.name, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json;charset=utf-8"
+    },
+    body: JSON.stringify(body)
+  }).then(res => res.json())
+    .then(calc => {
+      const formResult = form.querySelector(".form__result");
+      if (!formResult)
+        return;
+
+      let hasResultLabel = true;
+      let resultLabel = formResult.querySelector(".form__result__label");
+      if (!resultLabel) {
+        hasResultLabel = false;
+        resultLabel = document.createElement("p");
+        resultLabel.classList.add("form__result__label");
+      }
+
+      resultLabel.innerText = "Результат: " + calc.data.volume;
+      if (!hasResultLabel) {
+        formResult.appendChild(resultLabel);
+      }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", ready);
