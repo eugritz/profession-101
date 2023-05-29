@@ -2,11 +2,41 @@ from .figures import Dodecahedron, Icosahedron, Octahedron, Tetrahedron, Hexahed
 from marshmallow import Schema, fields, post_dump, post_load
 
 
+class SignedInt(fields.Int):
+    def __init__(self, *, sign: int = 1, **kwargs):
+        self.sign = sign
+        super().__init__(**kwargs)
+
+
+    def _validated(self, value):
+        format = super()._validated(value)
+        if format == None:
+            return None
+        if (self.sign > 0) != (format >= 0):
+            raise self.make_error('invalid', input=value)
+        return format
+
+
+class SignedFloat(fields.Float):
+    def __init__(self, *, sign: int = 1, **kwargs):
+        self.sign = sign
+        super().__init__(**kwargs)
+
+
+    def _validated(self, value):
+        format = super()._validated(value)
+        if format == None:
+            return None
+        if (self.sign > 0) != (format >= 0):
+            raise self.make_error('invalid', input=value)
+        return format
+
+
 class FigureSchema(Schema):
-    precision = fields.Int(data_key='precision', required=True)
-    edge = fields.Float(data_key='edge', metadata={'name': 'Ребро'})
-    radius = fields.Float(data_key='radius', metadata={'name': 'Радиус (R)'})
-    volume = fields.Float(data_key='volume', dump_only=True)
+    precision = SignedInt(data_key='precision', required=True)
+    edge = SignedFloat(data_key='edge', metadata={'name': 'Ребро'})
+    radius = SignedFloat(data_key='radius', metadata={'name': 'Радиус (R)'})
+    volume = SignedFloat(data_key='volume', dump_only=True)
 
     groups = [[edge], [radius]]
 
@@ -29,9 +59,9 @@ class TetrahedronSchema(FigureSchema):
 
 
 class HexahedronSchema(FigureSchema):
-    x = fields.Float(data_key='x', metadata={'name': 'Ширина'})
-    y = fields.Float(data_key='y', metadata={'name': 'Толщина'})
-    z = fields.Float(data_key='z', metadata={'name': 'Высота'})
+    x = SignedFloat(data_key='x', metadata={'name': 'Ширина'})
+    y = SignedFloat(data_key='y', metadata={'name': 'Толщина'})
+    z = SignedFloat(data_key='z', metadata={'name': 'Высота'})
 
     id = 'hexahedron'
     name = 'Шестиугольник (Куб)'

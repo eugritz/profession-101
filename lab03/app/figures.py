@@ -23,7 +23,7 @@ class Tetrahedron(Figure):
         elif self.radius != None:
             edge = 4 * self.radius / math.sqrt(6)
             return math.pow(edge, 3) * math.sqrt(2) / 12
-        raise CalculationError('Either edge or radius must be passed')
+        raise CalculationError('Either edge or radius must be passed.')
 
 
 @dataclass
@@ -42,7 +42,7 @@ class Hexahedron(Figure):
         elif self.radius != None:
             edge = 2 * self.radius / math.sqrt(3)
             return edge * edge * edge
-        raise CalculationError('Either x, y, z or edge or radius must be passed')
+        raise CalculationError('Either x, y, z or edge or radius must be passed.')
 
 
 @dataclass
@@ -54,7 +54,7 @@ class Octahedron(Figure):
         elif self.radius != None:
             edge = 2 * self.radius / math.sqrt(2)
             return math.pow(edge, 3) * math.sqrt(2) / 3
-        raise CalculationError('Either edge or radius must be passed')
+        raise CalculationError('Either edge or radius must be passed.')
 
 
 @dataclass
@@ -66,7 +66,7 @@ class Dodecahedron(Figure):
         elif self.radius != None:
             edge = 4 * self.radius / (1 + math.sqrt(5)) / math.sqrt(3)
             return math.pow(edge, 3) * (15 + 7 * math.sqrt(5)) / 4
-        raise CalculationError('Either edge or radius must be passed')
+        raise CalculationError('Either edge or radius must be passed.')
 
 
 @dataclass
@@ -78,4 +78,4 @@ class Icosahedron(Figure):
         elif self.radius != None:
             edge = 4 * self.radius / (10 + 2 * math.sqrt(5))
             return 5 * math.pow(edge, 3) * (3 + math.sqrt(5)) / 12
-        raise CalculationError('Either edge or radius must be passed')
+        raise CalculationError('Either edge or radius must be passed.')
