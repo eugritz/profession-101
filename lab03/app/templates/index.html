@@ -8,47 +8,62 @@
 {% block content %}
   <div class="content">
     <div>
-      <h2>Многогранники</h2>
-      <hr/>
-      <ul class="grid">
-        {% for figure in figures %}
-          <li>
-            <button class="figure" data-id={{loop.index0}}>
-              <div class="figure__content">
-                <img
-                  class="figure__content__preview"
-                  src={{figure.preview_src}}
-                />
-                <p class="figure__content__name">{{figure.name}}</p>
-              </div>
-            </button>
-          </li>
-        {% endfor %}
-      </ul>
+      <div>
+        <h2>Многогранники</h2>
+        <hr/>
+      </div>
+      <div>
+        <ul class="grid">
+          {% for figure in figures %}
+            <li>
+              <button class="figure" data-id={{loop.index0}}>
+                <div class="figure__content">
+                  <img
+                    class="figure__content__preview"
+                    src={{figure.preview_src}}
+                  />
+                  <p class="figure__content__name">{{figure.name}}</p>
+                </div>
+              </button>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
     <div>
-      <h2 id="calculator-label">Расчет объема фигуры</h2>
-      <hr/>
-      <div id="calculator-list">
-        {% for figure in figures %}
-          <div
-            class="form hidden"
-            data-id={{loop.index0}}
-            data-name={{figure.id}}
-          >
-            {% for group in figure.groups %}
-              <div>
-                {% for field in group %}
-                  {{ input(field.data_key, field.metadata.name) }}
-                {% endfor %}
-                <button>Вычислить</button>
-              </div>
-              {% if not loop.last %}
-                <p>либо</p>
-              {% endif %}
-            {% endfor %}
-          </div>
-        {% endfor %}
+      <div>
+        <h2 id="calculator-label">Расчет объема фигуры</h2>
+        <hr/>
+      </div>
+      <div>
+      <div id="precision">
+        <p>Точность: </p>
+        <div class="slider">
+          <input type="range" value="0" min="0" max="16" step="1" />
+          <p class="slider__value">0</p>
+        </div>
+      </div>
+        <div id="calculator-list">
+          {% for figure in figures %}
+            <div
+              class="form hidden"
+              data-id={{loop.index0}}
+              data-name={{figure.id}}
+            >
+              {% for group in figure.groups %}
+                <div>
+                  {% for field in group %}
+                    {{ input(field.data_key, field.metadata.name) }}
+                  {% endfor %}
+                  <button>Вычислить</button>
+                </div>
+                {% if not loop.last %}
+                  <p>либо</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </div>
