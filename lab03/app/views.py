@@ -1,16 +1,9 @@
 from . import app
-from . import schemas
+from .schemas import FIGURES
 from flask import render_template
 
 
 @app.route('/')
 @app.route('/index')
 def index():
-    figures = [
-        schemas.TetrahedronSchema,
-        schemas.HexahedronSchema,
-        schemas.OctahedronSchema,
-        schemas.DodecahedronSchema,
-        schemas.IcosahedronSchema
-    ]
-    return render_template('index.html', figures=figures)
+    return render_template('index.html', figures=FIGURES)
